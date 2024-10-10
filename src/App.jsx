@@ -3,36 +3,34 @@ import "./App.css";
 import FilterProductTable from "./components/FilterProductTable";
 import ProductTable from "./components/ProductTable";
 import SearchBar from "./components/SearchBar";
-
-const products = [
-  //Sporting Goods
-  { id: 1, name: "Tennis", price: 99.9, type: 1, stock: 100 },
-  { id: 2, name: "Badminton", price: 59.9, type: 1, stock: 16 },
-  { id: 3, name: "Basketball", price: 69.9, type: 1, stock: 0 },
-
-  //Electronics
-  { id: 4, name: "Ipod Touch", price: 49.9, type: 2, stock: 1 },
-  { id: 5, name: "Iphone 5", price: 59.9, type: 2, stock: 10 },
-  { id: 6, name: "Nexus 7", price: 69.9, type: 2, stock: 0 },
-];
-
-const headers = ["Sporting Goods", "Electronics"];
+import { useEffect } from "react";
 
 function App() {
-  //this section is for filtering search
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [query, setQuery] = useState("");
   const [stockChecked, setStockChecked] = useState(false);
 
-  const filteredProducts = products.filter(
-    (product) =>
-      //Case 1: If query is in name
-      product.name.toLowerCase().includes(query.toLowerCase()) &&
-      //Case 2: if it has stocks
-      // !stockChecks: if the value is false it can be considered
-      // product.stock > 0 we should render
-      // || because either of the case is 0
-      (!stockChecked || product.stock > 0)
-  );
+  useEffect(() => {
+    // call the api
+    const getProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("https://fakestoreapi.com/products");
+        const data = await response.json();
+
+        setProducts(data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getProducts();
+    // run when this component is destroyed or unmount
+    return () => {};
+  }, []);
 
   return (
     <FilterProductTable>
@@ -42,7 +40,15 @@ function App() {
         stockChecked={stockChecked}
         setStockChecked={setStockChecked}
       />
-      <ProductTable headers={headers} products={filteredProducts} />
+      {!loading ? (
+        <div className="flex flex-col gap-4">
+          {products.map((product) => (
+            <span key={product.id}>{product.title}</span>
+          ))}
+        </div>
+      ) : (
+        <span>Loading...</span>
+      )}
     </FilterProductTable>
   );
 }
