@@ -6,6 +6,7 @@ const button = ({ name, onClick, className }) => {
     <button
       onClick={onClick}
       className={clsx(className, "py-2 px-4 border rounded-md")}
+      data-testid="button"
     >
       {name}
     </button>
